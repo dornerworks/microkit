@@ -104,6 +104,7 @@ SUPPORTED_BOARDS = (
             "KernelArmExportPCNTUser": True,
             "KernelArmHypervisorSupport": True,
             "KernelArmVtimerUpdateVOffset": False,
+            "KernelAllowSMCCalls": True,
         },
         examples={
             "hello": Path("example/zcu102/hello")
