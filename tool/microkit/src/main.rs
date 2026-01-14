@@ -288,6 +288,7 @@ fn main() -> Result<(), String> {
         normal_regions,
         object_sizes,
         address_space_constants,
+        domain_scheduler: json_str_as_u64(&kernel_config_json, "NUM_DOMAINS")? != 1,
     };
 
     if kernel_config.arch != Arch::X86_64 && !loader_elf_path.exists() {

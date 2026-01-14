@@ -55,6 +55,7 @@ const DEFAULT_AARCH64_KERNEL_CONFIG: sel4::Config = sel4::Config {
         io_page_table_index_bits: None,
         vspace_user_top: 0xffffffffff,
     },
+    domain_scheduler: false,
 };
 
 const DEFAULT_X86_64_KERNEL_CONFIG: sel4::Config = sel4::Config {
@@ -86,6 +87,7 @@ const DEFAULT_X86_64_KERNEL_CONFIG: sel4::Config = sel4::Config {
         io_page_table_index_bits: Some(9),
         vspace_user_top: 0x7fffffffefff,
     },
+    domain_scheduler: false,
 };
 
 fn check_success(kernel_config: &sel4::Config, test_name: &str) {
