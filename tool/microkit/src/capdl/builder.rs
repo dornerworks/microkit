@@ -11,8 +11,8 @@ use std::{
 };
 
 use sel4_capdl_initializer_types::{
-    object, Cap, CapTableEntry, Fill, FillEntry, FillEntryContent, FillEntryContentBootInfo,
-    NamedObject, Object, ObjectId, Spec, Word,
+    object, Cap, CapTableEntry, DomainSchedEntry, Fill, FillEntry, FillEntryContent,
+    FillEntryContentBootInfo, NamedObject, Object, ObjectId, Spec, Word,
 };
 
 use crate::{
@@ -222,6 +222,7 @@ impl CapDLSpecContainer {
         sel4_config: &Config,
         pd_name: &str,
         pd_cpu: CpuCore,
+        pd_domain: Option<u8>,
         elf_id: usize,
         elf: &ElfFile,
     ) -> Result<ElfSpecResult, String> {
@@ -331,7 +332,7 @@ impl CapDLSpecContainer {
             sp: 0.into(),
             gprs: Vec::new(),
             master_fault_ep: None,
-            domain: None,
+            domain: pd_domain,
         };
 
         let tcb_inner_obj = object::Tcb {
@@ -396,6 +397,19 @@ pub fn build_capdl_spec(
 ) -> Result<CapDLSpecContainer, String> {
     let mut spec_container = CapDLSpecContainer::new();
 
+    if let Some(dom_sched) = &system.domain_schedule {
+        let schedule = dom_sched
+            .schedule
+            .iter()
+            .map(|x| DomainSchedEntry {
+                id: x.id,
+                time: x.length,
+            })
+            .collect();
+        spec_container.spec.domain_schedule = Some(schedule);
+        spec_container.spec.domain_set_start = Some(Word(0));
+    }
+
     // *********************************
     // Step 1. Create the monitor's spec.
     // *********************************
@@ -408,6 +422,7 @@ pub fn build_capdl_spec(
             kernel_config,
             MONITOR_PD_NAME,
             CpuCore(0),
+            None,
             mon_elf_id,
             &elfs[mon_elf_id],
         )
@@ -634,7 +649,14 @@ pub fn build_capdl_spec(
 
         // Step 3-1: Create TCB and VSpace with all ELF loadable frames mapped in.
         let pd_elf_spec = spec_container
-            .add_elf_to_spec(kernel_config, &pd.name, pd.cpu, pd_global_idx, elf_obj)
+            .add_elf_to_spec(
+                kernel_config,
+                &pd.name,
+                pd.cpu,
+                pd.domain_id,
+                pd_global_idx,
+                elf_obj,
+            )
             .unwrap();
 
         let pd_tcb_obj_id = pd_elf_spec.tcb;
@@ -1019,7 +1041,7 @@ pub fn build_capdl_spec(
                             sp: Word(0),
                             gprs: [].to_vec(),
                             master_fault_ep: None, // Not used on MCS kernel.
-                            domain: None,
+                            domain: pd.domain_id,
                         }),
                     };
                     let vm_vcpu_tcb_obj_id = spec_container.add_root_object(NamedObject {

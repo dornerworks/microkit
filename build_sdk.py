@@ -986,7 +986,6 @@ def main() -> None:
         if args.experimental_domain_support:
             for config in elaborated_configs:
                 config.kernel_options["KernelNumDomains"] = 256
-                config.kernel_options["KernelDomainSchedule"] = Path("domain_schedule.c")
 
         if args.configs is not None:
             elaborated_config_names = frozenset(config.name for config in elaborated_configs)

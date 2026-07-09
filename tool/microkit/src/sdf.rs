@@ -632,7 +632,7 @@ pub struct ProtectionDomain {
     /// Location in the parsed SDF file
     text_pos: Option<roxmltree::TextPos>,
     /// Index into the domain schedule vector if the system is using domain scheduling
-    pub domain_id: Option<u64>,
+    pub domain_id: Option<u8>,
 }
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
@@ -684,13 +684,13 @@ pub struct VirtualCpu {
 
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub struct DomainTimeslice {
-    pub id: u64,
+    pub id: u8,
     pub length: u64,
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct DomainSchedule {
-    pub domain_ids: HashMap<String, u64>,
+    pub domain_ids: HashMap<String, u8>,
     pub schedule: Vec<DomainTimeslice>,
 }
 
